@@ -220,8 +220,8 @@ function App() {
   return (
     <div className="app-root">
       <header className="app-header">
-        <h1>Water Level Monitor Dashboard</h1>
-        <span className="app-subtitle">IoT nước + PostgreSQL + Telegram</span>
+        <h1>CẢNH BÁO LŨ LỤT HCMUE DASHBOARD</h1>
+        <span className="app-subtitle">Nhóm , HCMUE</span>
       </header>
 
       <main className="app-main">
@@ -432,7 +432,7 @@ function App() {
                         type="text"
                         value={telegramChatId}
                         onChange={(e) => setTelegramChatId(e.target.value)}
-                        placeholder="Mặc định dùng chat ID trong .env"
+                        placeholder="Mặc định dùng chat bot có sẵn."
                       />
                     </label>
                   </div>
