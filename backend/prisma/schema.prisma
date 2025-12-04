@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model alert_config {
+  id                Int       @id @default(autoincrement())
+  device_id         String    @unique(map: "idx_alert_config_device") @db.VarChar(50)
+  min_level_percent Decimal?  @db.Decimal(5, 2)
+  max_level_percent Decimal?  @db.Decimal(5, 2)
+  alert_enabled     Boolean?  @default(true)
+  telegram_chat_id  String?   @db.VarChar(100)
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime? @default(now()) @db.Timestamptz(6)
+  devices           devices   @relation(fields: [device_id], references: [device_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_alert_config_device")
+}
+
+model alerts {
+  id               BigInt          @id @default(autoincrement())
+  device_id        String          @db.VarChar(50)
+  reading_id       BigInt?
+  alert_type       String          @db.VarChar(20)
+  message          String
+  sent_to_telegram Boolean?        @default(false)
+  created_at       DateTime?       @default(now()) @db.Timestamptz(6)
+  devices          devices         @relation(fields: [device_id], references: [device_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_alerts_device")
+  water_readings   water_readings? @relation(fields: [reading_id], references: [id], onUpdate: NoAction, map: "fk_alerts_reading")
+
+  @@index([device_id, created_at(sort: Desc)], map: "idx_alerts_device_created")
+}
+
+model devices {
+  id             Int              @id @default(autoincrement())
+  device_id      String           @unique @db.VarChar(50)
+  name           String           @db.VarChar(100)
+  location       String?          @db.VarChar(255)
+  created_at     DateTime?        @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?        @default(now()) @db.Timestamptz(6)
+  alert_config   alert_config?
+  alerts         alerts[]
+  water_readings water_readings[]
+
+  @@index([device_id], map: "idx_devices_device_id")
+}
+
+model water_readings {
+  id                  BigInt    @id @default(autoincrement())
+  device_id           String    @db.VarChar(50)
+  water_level_cm      Decimal?  @db.Decimal(10, 2)
+  water_level_percent Decimal?  @db.Decimal(5, 2)
+  status              String?   @db.VarChar(20)
+  created_at          DateTime? @default(now()) @db.Timestamptz(6)
+  alerts              alerts[]
+  devices             devices   @relation(fields: [device_id], references: [device_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_water_readings_device")
+
+  @@index([device_id, created_at(sort: Desc)], map: "idx_water_readings_device_created")
+}

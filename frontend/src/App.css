@@ -1,0 +1,204 @@
+/* src/App.css */
+
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color-scheme: dark;
+  color: #e5e7eb;
+  background-color: #020617;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+}
+
+.app-root {
+  min-height: 100vh;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.app-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.app-subtitle {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.app-main {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .app-main {
+    grid-template-columns: 1.2fr 1.2fr 2fr;
+    align-items: flex-start;
+  }
+}
+
+.card {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.device-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #4b5563;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.device-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.latest-box p {
+  margin: 4px 0;
+}
+
+.status {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-normal {
+  background: rgba(22, 163, 74, 0.15);
+  color: #4ade80;
+}
+
+.status-low {
+  background: rgba(249, 115, 22, 0.15);
+  color: #fdba74;
+}
+
+.status-high {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.status-unknown {
+  background: rgba(148, 163, 184, 0.15);
+  color: #e5e7eb;
+}
+
+.table-wrapper {
+  max-height: 320px;
+  overflow: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.history-table th,
+.history-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(30, 64, 175, 0.4);
+}
+
+.history-table th {
+  text-align: left;
+  position: sticky;
+  top: 0;
+  background: #020617;
+}
+
+.error {
+  color: #fca5a5;
+}
+
+.config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.form-row label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  gap: 4px;
+}
+
+.form-row input[type="number"],
+.form-row input[type="text"] {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #4b5563;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.form-row input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.checkbox-label {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn {
+  margin-top: 4px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.config-note {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.success-text {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #4ade80;
+}
+
+.chart-wrapper {
+  width: 100%;
+  height: 220px;
+  margin-bottom: 12px;
+}
