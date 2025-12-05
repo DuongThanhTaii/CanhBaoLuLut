@@ -221,7 +221,7 @@ function App() {
     <div className="app-root">
       <header className="app-header">
         <h1>CẢNH BÁO LŨ LỤT HCMUE DASHBOARD</h1>
-        <span className="app-subtitle">Nhóm , HCMUE</span>
+        <span className="app-subtitle">Nhóm Slầy Gơ, HCMUE</span>
       </header>
 
       <main className="app-main">
@@ -388,7 +388,7 @@ function App() {
 
                   <div className="form-row">
                     <label>
-                      Min level (%):
+                      Ngưỡng tối thiểu (%):
                       <input
                         type="number"
                         step="1"
@@ -402,7 +402,7 @@ function App() {
 
                   <div className="form-row">
                     <label>
-                      Max level (%):
+                      Ngưỡng tối đa (%):
                       <input
                         type="number"
                         step="1"

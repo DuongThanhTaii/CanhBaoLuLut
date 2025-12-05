@@ -148,24 +148,61 @@ export async function handleWaterLevel(req: Request, res: Response) {
 
       if (shouldAlert) {
         const alertType = finalStatus === "LOW" ? "LOW_LEVEL" : "HIGH_LEVEL";
-        const levelText =
+
+        const levelPercentText =
           typeof water_level_percent === "number"
             ? `${water_level_percent.toFixed(1)}%`
-            : "N/A";
+            : "không rõ";
+
+        const levelCmText =
+          typeof water_level_cm === "number"
+            ? `${water_level_cm.toFixed(1)} cm`
+            : "không rõ";
+
+        const timeText = createdAt.toLocaleString("vi-VN");
+
+        // (Optional) nếu bạn có dashboard URL thì cho vào env
+        // const dashboardUrl = process.env.DASHBOARD_URL;
+        // const dashboardLine = dashboardUrl
+        //   ? `\n🌐 Xem chi tiết: ${dashboardUrl}`
+        //   : "";
+
+        // Tiêu đề tuỳ theo trạng thái
+        let prefix = "";
+        if (finalStatus === "HIGH") {
+          prefix = "🚨 CẢNH BÁO MỰC NƯỚC CAO 🚨";
+        } else if (finalStatus === "LOW") {
+          prefix = "⚠️ Cảnh báo mực nước thấp";
+        }
+
+        // Gợi ý hành động
+        let actionHint = "";
+        if (finalStatus === "HIGH") {
+          actionHint =
+            "\n➡️ Vui lòng kiểm tra ngay khu vực xung quanh, có nguy cơ tràn/ngập.";
+        } else if (finalStatus === "LOW") {
+          actionHint =
+            "\n➡️ Vui lòng kiểm tra nguồn nước, xem có cần bơm thêm hoặc xử lý sự cố thiếu nước.";
+        }
 
         const alertText = [
-          `⚠️ CẢNH BÁO MỨC NƯỚC ${finalStatus === "LOW" ? "THẤP" : "CAO"}`,
-          `Thiết bị: ${deviceName} (${device_id})`,
-          `Mức nước hiện tại: ${levelText}`,
-          `Ngưỡng: min=${minLevel}%, max=${maxLevel}%`,
-          `Thời gian: ${createdAt.toLocaleString()}`,
-        ].join("\n");
+          prefix,
+          "",
+          `📍 Thiết bị: ${deviceName} (${device_id})`,
+          `💧 Mực nước hiện tại: ${levelPercentText} (${levelCmText})`,
+          `📊 Ngưỡng cài đặt: min = ${minLevel}% · max = ${maxLevel}%`,
+          `🕒 Thời gian: ${timeText}`,
+          actionHint,
+          // dashboardLine,
+        ]
+          .filter((line) => line !== "")
+          .join("\n");
 
         const alertInsert = await client.query(
           `INSERT INTO alerts
-           (device_id, reading_id, alert_type, message, sent_to_telegram, created_at)
-           VALUES ($1, $2, $3, $4, $5, $6)
-           RETURNING *`,
+     (device_id, reading_id, alert_type, message, sent_to_telegram, created_at)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     RETURNING *`,
           [
             device_id,
             readingId,
