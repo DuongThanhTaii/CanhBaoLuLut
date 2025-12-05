@@ -1,30 +1,104 @@
 /* src/App.css */
 
+/* ==== FONT & THEME VARIABLES ==== */
 :root {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   color-scheme: dark;
-  color: #e5e7eb;
-  background-color: #020617;
+
+  /* default values (sẽ bị override bởi data-theme) */
+  --bg: #020617;
+  --bg-card: #020617;
+  --border-subtle: #1f2937;
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.1);
+  --danger: #ef4444;
+  --warning: #f97316;
+  --success: #22c55e;
+  --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.8);
 }
+
+/* Dark theme (mặc định) */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #020617;
+  --bg-card: #020617;
+  --border-subtle: #1f2937;
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.1);
+  --danger: #ef4444;
+  --warning: #f97316;
+  --success: #22c55e;
+  --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.8);
+}
+
+/* Light theme */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f3f4f6;
+  --bg-card: #ffffff;
+  --border-subtle: #d1d5db;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --accent: #0ea5e9;
+  --accent-soft: rgba(14, 165, 233, 0.12);
+  --danger: #dc2626;
+  --warning: #ea580c;
+  --success: #16a34a;
+  --shadow-soft: 0 12px 30px rgba(15, 23, 42, 0.15);
+}
+
+/* ==== GLOBAL ==== */
 
 body {
   margin: 0;
   padding: 0;
-  background: radial-gradient(circle at top, #0f172a, #020617);
+  background: radial-gradient(
+      circle at top,
+      rgba(56, 189, 248, 0.08),
+      transparent
+    ),
+    var(--bg);
+  color: var(--text-main);
 }
+
+/* ==== LAYOUT CHÍNH ==== */
 
 .app-root {
   min-height: 100vh;
   padding: 24px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(
+      circle at top,
+      rgba(56, 189, 248, 0.08),
+      transparent
+    ),
+    var(--bg);
+  color: var(--text-main);
 }
+
+/* Header: tiêu đề + nút đổi theme */
 
 .app-header {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+}
+
+.app-title-block {
+  display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-bottom: 24px;
 }
 
 .app-header h1 {
@@ -34,8 +108,39 @@ body {
 
 .app-subtitle {
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
+
+/* Nút toggle theme */
+
+.theme-toggle-btn {
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
+}
+
+.theme-toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.4);
+  border-color: var(--accent);
+}
+
+.theme-toggle-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Grid nội dung */
 
 .app-main {
   display: grid;
@@ -49,12 +154,14 @@ body {
   }
 }
 
+/* ==== CARD / KHUNG ==== */
+
 .card {
-  background: rgba(15, 23, 42, 0.9);
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-subtle);
 }
 
 .card h2 {
@@ -63,23 +170,30 @@ body {
   margin-bottom: 12px;
 }
 
+/* ==== SELECT THIẾT BỊ ==== */
+
 .device-select {
   width: 100%;
   padding: 8px 10px;
   border-radius: 8px;
-  border: 1px solid #4b5563;
-  background: #020617;
-  color: #e5e7eb;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg);
+  color: var(--text-main);
 }
 
 .device-select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-soft);
 }
+
+/* ==== TRẠNG THÁI MỚI NHẤT ==== */
 
 .latest-box p {
   margin: 4px 0;
 }
+
+/* Badge status */
 
 .status {
   padding: 2px 8px;
@@ -89,24 +203,26 @@ body {
 }
 
 .status-normal {
-  background: rgba(22, 163, 74, 0.15);
-  color: #4ade80;
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--success);
 }
 
 .status-low {
-  background: rgba(249, 115, 22, 0.15);
-  color: #fdba74;
+  background: rgba(249, 115, 22, 0.12);
+  color: var(--warning);
 }
 
 .status-high {
-  background: rgba(239, 68, 68, 0.15);
-  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--danger);
 }
 
 .status-unknown {
   background: rgba(148, 163, 184, 0.15);
-  color: #e5e7eb;
+  color: var(--text-main);
 }
+
+/* ==== LỊCH SỬ & BẢNG ==== */
 
 .table-wrapper {
   max-height: 320px;
@@ -122,18 +238,20 @@ body {
 .history-table th,
 .history-table td {
   padding: 6px 8px;
-  border-bottom: 1px solid rgba(30, 64, 175, 0.4);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .history-table th {
   text-align: left;
   position: sticky;
   top: 0;
-  background: #020617;
+  background: var(--bg-card);
 }
 
+/* ==== FORM CẤU HÌNH ==== */
+
 .error {
-  color: #fca5a5;
+  color: var(--danger);
 }
 
 .config-form {
@@ -154,14 +272,15 @@ body {
 .form-row input[type="text"] {
   padding: 6px 8px;
   border-radius: 8px;
-  border: 1px solid #4b5563;
-  background: #020617;
-  color: #e5e7eb;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg);
+  color: var(--text-main);
 }
 
 .form-row input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-soft);
 }
 
 .checkbox-label {
@@ -170,15 +289,29 @@ body {
   gap: 8px;
 }
 
+/* Nút lưu */
+
 .btn {
   margin-top: 4px;
   padding: 8px 12px;
   border-radius: 999px;
   border: none;
-  background: #3b82f6;
+  background: var(--accent);
   color: white;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+}
+
+.btn:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .btn:disabled {
@@ -188,14 +321,16 @@ body {
 
 .config-note {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .success-text {
   margin-top: 4px;
   font-size: 13px;
-  color: #4ade80;
+  color: var(--success);
 }
+
+/* ==== CHART ==== */
 
 .chart-wrapper {
   width: 100%;

@@ -37,6 +37,8 @@ type Reading = {
   created_at: string;
 };
 
+type Theme = "light" | "dark";
+
 const StatusDot: React.FC<any> = (props) => {
   const { cx, cy, payload } = props;
   if (cx == null || cy == null || !payload) return null;
@@ -90,7 +92,27 @@ function App() {
   const [configSaving, setConfigSaving] = useState(false);
   const [configSaveMsg, setConfigSaveMsg] = useState<string | null>(null);
 
+  const [theme, setTheme] = useState<Theme>("dark");
+
+  // Load theme từ localStorage khi mở web
+  useEffect(() => {
+    const saved = localStorage.getItem("wlm-theme");
+    if (saved === "light" || saved === "dark") {
+      setTheme(saved);
+      document.documentElement.setAttribute("data-theme", saved);
+    } else {
+      // mặc định dark
+      document.documentElement.setAttribute("data-theme", "dark");
+    }
+  }, []);
+
+  // Mỗi khi theme đổi -> cập nhật lên <html data-theme="...">
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("wlm-theme", theme);
+  }, [theme]);
   // Load devices lúc mở web
+
   useEffect(() => {
     async function loadDevices() {
       try {
@@ -220,8 +242,18 @@ function App() {
   return (
     <div className="app-root">
       <header className="app-header">
-        <h1>CẢNH BÁO LŨ LỤT HCMUE DASHBOARD</h1>
-        <span className="app-subtitle">Nhóm Slầy Gơ, HCMUE</span>
+        <div className="app-title-block">
+          <h1>CẢNH BÁO LŨ LỤT HCMUE DASHBOARD</h1>
+          <span className="app-subtitle">Nhóm Slầy Gơ, HCMUE</span>
+        </div>
+
+        <button
+          type="button"
+          className="theme-toggle-btn"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        >
+          {theme === "dark" ? "🌞 Light" : "🌙 Dark"}
+        </button>
       </header>
 
       <main className="app-main">
