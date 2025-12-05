@@ -189,9 +189,8 @@ export async function handleWaterLevel(req: Request, res: Response) {
           prefix,
           "",
           `📍 Thiết bị: ${deviceName} (${device_id})`,
-          `💧 Mực nước hiện tại: ${levelPercentText} (${levelCmText})`,
+          `💧 Mực nước hiện tại: ${levelPercentText}`,
           `📊 Ngưỡng cài đặt: min = ${minLevel}% · max = ${maxLevel}%`,
-          `🕒 Thời gian: ${timeText}`,
           actionHint,
           // dashboardLine,
         ]
