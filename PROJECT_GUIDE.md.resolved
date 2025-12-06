@@ -1,0 +1,141 @@
+# Tài Liệu Học Tập: Phân Tích Hệ Thống IoT Cảnh Báo Lũ Lụt
+*(Dành cho người mới bắt đầu học lập trình & hệ thống)*
+
+Tài liệu này không chỉ hướng dẫn chạy dự án, mà còn giải thích **tại sao** chúng ta lại xây dựng như vậy. Chúng ta sẽ đi sâu vào kiến thức Backend, Frontend và Database thông qua ví dụ thực tế này.
+
+---
+
+## 1. Kiến Trúc Hệ Thống (System Architecture)
+
+Dự án này sử dụng mô hình **Client-Server** cổ điển, kết hợp với **IoT**.
+
+### Mô Hình 3 Lớp (3-Tier Architecture)
+
+1.  **Presentation Layer (Frontend)**: Giao diện người dùng.
+    *   *Công nghệ*: React (Vite), TypeScript.
+    *   *Vai trò*: Hiển thị dữ liệu cho con người xem.
+2.  **Application Layer (Backend)**: Xử lý logic nghiệp vụ.
+    *   *Công nghệ*: Node.js, Express.
+    *   *Vai trò*: Nhận dữ liệu từ cảm biến, tính toán (có lụt không?), và trả lời Frontend.
+3.  **Data Layer (Database)**: Lưu trữ dữ liệu bền vững.
+    *   *Công nghệ*: PostgreSQL.
+    *   *Vai trò*: Lưu lại lịch sử đo đạc để sau này xem lại.
+
+---
+
+## 2. Phân Tích Backend (Node.js & Express)
+
+Backend là nơi "quyết định" mọi thứ. Hãy xem code hoạt động thế nào.
+
+### 2.1. API là gì?
+API (Application Programming Interface) là cái "cổng" để các phần mềm nói chuyện với nhau.
+*   Trong dự án này, Backend mở ra các cổng (Endpoints) để:
+    *   **IoT Device** gửi số liệu vào (`POST /api/iot/water-level`).
+    *   **Frontend** lấy số liệu ra (`GET /api/devices/...`).
+
+### 2.2. Luồng Xử Lý Một Request (Controller)
+Hãy xem file [src/controllers/iotController.ts](file:///c:/Users/Duy%20Tan/Desktop/Thanh%20Tai/DHSP-HK1-25-26/web_iot_2/backend/src/controllers/iotController.ts). Đây là nơi xử lý logic chính.
+
+```typescript
+// Khi thiết bị gửi dữ liệu lên, hàm này sẽ chạy:
+export async function handleWaterLevel(req: Request, res: Response) {
+    // 1. Lấy dữ liệu từ gói tin (Request Body)
+    const { device_id, water_level_percent } = req.body;
+
+    // 2. Logic nghiệp vụ (Business Logic):
+    // Kiểm tra xem mức nước này có nguy hiểm không?
+    let status = "NORMAL";
+    if (water_level_percent > 90) status = "HIGH"; // Nguy hiểm!
+
+    // 3. Tương tác Database (SQL):
+    // Lưu lại bản ghi này vào bảng 'water_readings'
+    await client.query("INSERT INTO water_readings ...");
+
+    // 4. Tác vụ phụ (Side Effect):
+    // Nếu nguy hiểm -> Gửi tin nhắn Telegram ngay.
+    if (status === "HIGH") {
+        await sendTelegramMessage(...);
+    }
+
+    // 5. Trả lời (Response):
+    // Báo cho thiết bị biết là "Tao đã nhận được rồi nhé"
+    res.json({ success: true });
+}
+```
+
+**Bài học**: Backend không chỉ lưu dữ liệu, nó còn là nơi **Validate** (kiểm tra dữ liệu đúng sai) và thực hiện các hành động tự động (gửi cảnh báo).
+
+---
+
+## 3. Phân Tích Frontend (ReactJS)
+
+Frontend là nơi biến dữ liệu thô (JSON) thành hình ảnh đẹp đẽ.
+
+### 3.1. Component & State
+Trong React, mọi thứ là **Component** (thành phần). File [App.tsx](file:///c:/Users/Duy%20Tan/Desktop/Thanh%20Tai/DHSP-HK1-25-26/web_iot_2/frontend/src/App.tsx) là component chính.
+*   **State (`useState`)**: Là "trí nhớ" của component.
+    *   Ví dụ: `const [waterLevel, setWaterLevel] = useState(0);`
+    *   Khi `waterLevel` thay đổi, giao diện tự động vẽ lại số mới. Không cần reload trang.
+
+### 3.2. Side Effect (`useEffect`)
+Làm sao để tự động lấy dữ liệu mới? Chúng ta dùng `useEffect`.
+
+```typescript
+// App.tsx
+useEffect(() => {
+    // Hàm này chạy ngay khi mở trang web
+    async function loadData() {
+        // Gọi điện lên Backend xin số liệu (Fetch API)
+        const data = await getLatestReading();
+        
+        // Cập nhật vào trí nhớ (State)
+        setLatest(data); 
+    }
+    loadData();
+}, []); // [] nghĩa là chỉ chạy 1 lần lúc đầu
+```
+
+**Bài học**: Frontend không lưu dữ liệu vĩnh viễn. Nó chỉ "mượn" dữ liệu từ Backend để hiển thị. Tắt tab đi là mất, mở lại phải tải lại.
+
+---
+
+## 4. Cơ Sở Dữ Liệu (Database Design)
+
+Chúng ta dùng PostgreSQL (SQL). Tại sao cần chia bảng?
+
+*   **Bảng `devices`**: Lưu thông tin cố định của thiết bị (Tên, Vị trí).
+    *   *Tại sao?* Để không phải gửi kèm tên thiết bị trong mỗi lần đo (tốn băng thông).
+*   **Bảng `water_readings`**: Lưu lịch sử đo đạc.
+    *   Cột: `device_id`, `level`, `created_at` (thời gian).
+    *   Đây là bảng sẽ phình to ra rất nhanh (Time-series data).
+*   **Bảng `alert_config`**: Lưu cài đặt của người dùng.
+    *   Ví dụ: Người dùng muốn trên 80% là báo động. Backend sẽ đọc bảng này để quyết định.
+
+---
+
+## 5. Tổng Kết Luồng Đi (Data Flow)
+
+Để hiểu rõ nhất, hãy theo dõi hành trình của **một con số**:
+
+1.  **Khởi tạo**: Cảm biến đo được số `85`.
+2.  **Truyền tin (HTTP)**: Cảm biến đóng gói số `85` vào phong bì JSON, gửi qua mạng Internet đến địa chỉ Server.
+3.  **Xử lý (Backend)**: Server bóc phong bì. Thấy số `85`.
+    *   Server hỏi Database: "Chủ nhà cài đặt bao nhiêu thì báo động?"
+    *   Database trả lời: "Chủ cài 80".
+    *   Server so sánh: 85 > 80 => **BÁO ĐỘNG!**
+4.  **Lưu trữ (DB)**: Server ghi vào sổ: "Lúc 10h, đo được 85, Báo động".
+5.  **Hiển thị (Frontend)**:
+    *   Người dùng mở Web.
+    *   Web hỏi Server: "Số mới nhất là bao nhiêu?"
+    *   Server trả lời: "85, đang Báo động".
+    *   Web tô màu đỏ lên màn hình.
+
+---
+
+## 6. Bài Tập Cho Bạn (Để Hiểu Sâu Hơn)
+
+1.  **Thử sửa code Backend**: Vào [iotController.ts](file:///c:/Users/Duy%20Tan/Desktop/Thanh%20Tai/DHSP-HK1-25-26/web_iot_2/backend/src/controllers/iotController.ts), tìm dòng kiểm tra `DEFAULT_MAX = 90`. Thử sửa thành `50` rồi gửi dữ liệu `60` lên xem nó có báo động không?
+2.  **Thử sửa code Frontend**: Vào [App.tsx](file:///c:/Users/Duy%20Tan/Desktop/Thanh%20Tai/DHSP-HK1-25-26/web_iot_2/frontend/src/App.tsx), tìm chỗ hiển thị màu sắc (`fill`). Thử đổi màu báo động từ Đỏ (`#ef4444`) sang Tím xem sao.
+3.  **Xem Database**: Dùng công cụ quản lý DB, mở bảng `water_readings` xem các dòng dữ liệu được thêm vào như thế nào.
+
+Chúc bạn học tốt! Hệ thống này là ví dụ hoàn hảo để bắt đầu con đường Full-stack Developer.

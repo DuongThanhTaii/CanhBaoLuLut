@@ -2,8 +2,10 @@
 import { Request, Response } from "express";
 import { pool } from "../config/db";
 
-// GET /api/devices
+// [API] Lấy danh sách tất cả thiết bị
+// Frontend gọi API này để hiển thị Dropdown chọn thiết bị.
 export async function getDevices(req: Request, res: Response) {
+
   try {
     const result = await pool.query(
       `SELECT id, device_id, name, location, created_at, updated_at
@@ -26,8 +28,10 @@ export async function getDevices(req: Request, res: Response) {
   }
 }
 
-// GET /api/devices/:deviceId/latest
+// [API] Lấy số liệu mới nhất của 1 thiết bị
+// Frontend gọi API này để hiển thị trạng thái hiện tại (Real-time status).
 export async function getLatestReading(req: Request, res: Response) {
+
   const { deviceId } = req.params;
 
   try {
@@ -57,8 +61,10 @@ export async function getLatestReading(req: Request, res: Response) {
   }
 }
 
-// GET /api/devices/:deviceId/readings?from=&to=&limit=&offset=
+// [API] Lấy lịch sử đo đạc (có phân trang & lọc theo ngày)
+// Frontend gọi API này để vẽ biểu đồ (Chart) và hiển thị bảng lịch sử.
 export async function getReadings(req: Request, res: Response) {
+
   const { deviceId } = req.params;
   const { from, to, limit = "100", offset = "0" } = req.query;
 
@@ -130,8 +136,10 @@ export async function getReadings(req: Request, res: Response) {
   }
 }
 
-// GET /api/devices/:deviceId/config
+// [API] Lấy cấu hình cảnh báo hiện tại
+// Frontend gọi API này khi người dùng mở form "Cấu hình cảnh báo".
 export async function getConfig(req: Request, res: Response) {
+
   const { deviceId } = req.params;
   const DEFAULT_MIN = 20;
   const DEFAULT_MAX = 90;
@@ -196,8 +204,10 @@ export async function getConfig(req: Request, res: Response) {
   }
 }
 
-// PUT /api/devices/:deviceId/config
+// [API] Cập nhật cấu hình cảnh báo
+// Frontend gọi API này khi người dùng nhấn nút "Lưu cấu hình".
 export async function updateConfig(req: Request, res: Response) {
+
   const { deviceId } = req.params;
   const { minLevelPercent, maxLevelPercent, alertEnabled, telegramChatId } =
     req.body;

@@ -7,6 +7,7 @@ import {
   getConfig,
   updateConfig,
 } from "./api/client";
+// Import thư viện Recharts để vẽ biểu đồ
 import {
   ResponsiveContainer,
   LineChart,
@@ -16,6 +17,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+
 
 import "./App.css";
 
@@ -39,6 +41,7 @@ type Reading = {
 
 type Theme = "light" | "dark";
 
+// [COMPONENT] Component hiển thị chấm tròn màu trạng thái trên biểu đồ
 const StatusDot: React.FC<any> = (props) => {
   const { cx, cy, payload } = props;
   if (cx == null || cy == null || !payload) return null;
@@ -46,6 +49,7 @@ const StatusDot: React.FC<any> = (props) => {
   const status = String(payload.status || "").toUpperCase();
   let fill = "#9ca3af"; // default xám
 
+  // Đổi màu tùy theo trạng thái
   if (status === "NORMAL") fill = "#4ade80"; // xanh lá
   else if (status === "LOW") fill = "#f97316"; // cam
   else if (status === "HIGH") fill = "#ef4444"; // đỏ
@@ -63,25 +67,35 @@ const StatusDot: React.FC<any> = (props) => {
   );
 };
 
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString();
 }
 
+// [MAIN COMPONENT] Component chính của ứng dụng
 function App() {
+  // [STATE] Quản lý dữ liệu trong bộ nhớ của React
+  // Khi các biến này thay đổi, giao diện sẽ tự động vẽ lại (re-render).
+
+  // 1. Danh sách thiết bị
   const [devices, setDevices] = useState<Device[]>([]);
   const [devicesLoading, setDevicesLoading] = useState(true);
   const [devicesError, setDevicesError] = useState<string | null>(null);
 
+  // Thiết bị đang được chọn
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
 
+  // 2. Số liệu mới nhất (Real-time)
   const [latest, setLatest] = useState<Reading | null>(null);
   const [latestLoading, setLatestLoading] = useState(false);
   const [latestError, setLatestError] = useState<string | null>(null);
 
+  // 3. Lịch sử đo đạc (cho biểu đồ)
   const [history, setHistory] = useState<Reading[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
 
+  // 4. Cấu hình cảnh báo
   const [configLoading, setConfigLoading] = useState(false);
   const [configError, setConfigError] = useState<string | null>(null);
   const [minLevel, setMinLevel] = useState<number>(20);
@@ -93,6 +107,7 @@ function App() {
   const [configSaveMsg, setConfigSaveMsg] = useState<string | null>(null);
 
   const [theme, setTheme] = useState<Theme>("dark");
+
 
   // Load theme từ localStorage khi mở web
   useEffect(() => {
@@ -113,16 +128,19 @@ function App() {
   }, [theme]);
   // Load devices lúc mở web
 
+  // [EFFECT] Chạy 1 lần duy nhất khi mở web (vì dependency array là [])
+  // Nhiệm vụ: Tải danh sách thiết bị từ Server.
   useEffect(() => {
     async function loadDevices() {
       try {
         setDevicesLoading(true);
         setDevicesError(null);
-        const res = await getDevices();
+        const res = await getDevices(); // Gọi API
         if (!res.success) {
           throw new Error(res.error || "Failed to load devices");
         }
         setDevices(res.data);
+        // Mặc định chọn thiết bị đầu tiên nếu có
         if (res.data.length > 0) {
           setSelectedDeviceId(res.data[0].device_id);
         }
@@ -136,11 +154,14 @@ function App() {
     loadDevices();
   }, []);
 
+
   // Khi chọn device -> load latest + history + config
+  // [EFFECT] Chạy mỗi khi người dùng đổi thiết bị (selectedDeviceId thay đổi)
+  // Nhiệm vụ: Tải lại toàn bộ dữ liệu (Latest, History, Config) của thiết bị mới.
   useEffect(() => {
     if (!selectedDeviceId) return;
 
-    const deviceId = selectedDeviceId; // đảm bảo là string, không null
+    const deviceId = selectedDeviceId;
 
     async function loadLatest() {
       try {
@@ -184,6 +205,7 @@ function App() {
           throw new Error(res.error || "Failed to load config");
         }
         const cfg = res.data;
+        // Fill dữ liệu vào Form
         setMinLevel(cfg.minLevelPercent);
         setMaxLevel(cfg.maxLevelPercent);
         setAlertEnabled(cfg.alertEnabled);
@@ -201,8 +223,10 @@ function App() {
     loadConfig();
   }, [selectedDeviceId]);
 
+
+  // [EVENT HANDLER] Xử lý khi người dùng nhấn nút "Lưu cấu hình"
   async function handleSaveConfig(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+    e.preventDefault(); // Chặn reload trang
     if (!selectedDeviceId) return;
 
     try {
@@ -210,6 +234,7 @@ function App() {
       setConfigError(null);
       setConfigSaveMsg(null);
 
+      // Gọi API cập nhật
       const res = await updateConfig(selectedDeviceId, {
         minLevelPercent: minLevel,
         maxLevelPercent: maxLevel,
@@ -229,6 +254,8 @@ function App() {
     }
   }
 
+
+  // Chuẩn bị dữ liệu cho biểu đồ (đảo ngược để cái mới nhất nằm bên phải)
   const chartData = history
     .slice() // copy
     .reverse() // lịch sử từ cũ -> mới
@@ -238,6 +265,7 @@ function App() {
         r.water_level_percent != null ? Number(r.water_level_percent) : null,
       status: r.status,
     }));
+
 
   return (
     <div className="app-root">
